@@ -26,7 +26,10 @@ def get_view_count(video_id):
     r = requests.get(api).json()
     return int(r["items"][0]["statistics"]["viewCount"]) if "items" in r and r["items"] else None
 
-results = notion.databases.query(database_id=DATABASE_ID)
+# Notion API >= 2025-09-03 (notion-client v2.6.0+) requires querying via data_sources
+db_info = notion.databases.retrieve(database_id=DATABASE_ID)
+data_source_id = db_info["data_sources"][0]["id"]
+results = notion.data_sources.query(data_source_id=data_source_id)
 for page in results["results"]:
     props = page["properties"]
     if URL_PROP not in props or not props[URL_PROP].get("url"):
